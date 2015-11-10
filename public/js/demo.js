@@ -68,7 +68,7 @@ $(document).ready(function() {
       data: {
         text: $content.val()
       },
-      url: '/',
+      url: '/build',
       dataType: 'json',
       success: function(response) {
         $loading.hide();
@@ -91,6 +91,21 @@ $(document).ready(function() {
         } catch(e) {}
         showError(error.error || error);
       }
+    });
+  });
+
+  $(".savedb-btn").click(function(e) {
+    $('.savedb-btn').blur();
+    $.ajax({
+       type: 'POST',
+      data: {
+        text: $content.val()
+      },
+      url: '/save',
+      dataType: 'json'
+    })
+    .done(function() {
+      alert("xoxo");
     });
   });
 

@@ -19,6 +19,8 @@ import os
 import cherrypy
 import requests
 import json
+from json2html import *
+from sqldbservice import SqlDBService
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
@@ -33,9 +35,9 @@ class PersonalityInsightsService:
         """
 
         # Local variables
-        self.url = "<url>"
-        self.username = "<username>"
-        self.password = "<password>"
+        self.url = "https://gateway.watsonplatform.net/personality-insights/api"
+        self.username = "046ecae3-1c92-4061-8f5a-d5dd6538bace"
+        self.password = "vD4uq7t5YmnV"
 
         if vcapServices is not None:
             print("Parsing VCAP_SERVICES")
@@ -67,15 +69,10 @@ class PersonalityInsightsService:
 
 
 class DemoService(object):
-    """
-    REST service/app. Since we just have 1 GET and 1 POST URLs,
-    there is not even need to look at paths in the request.
-    This class implements the handler API for cherrypy library.
-    """
-    exposed = True
 
-    def __init__(self, service):
+    def __init__(self, service, sqldb):
         self.service = service
+        self.sqldb = sqldb
         self.defaultContent = None
         try:
             contentFile = open("public/text/en.txt", "r")
@@ -85,23 +82,37 @@ class DemoService(object):
         finally:
             contentFile.close()
 
-    def GET(self):
-        """Shows the default page with sample text content"""
 
-        return lookup.get_template("index.html").render(content=self.defaultContent)
+    @cherrypy.expose
+    def index(self):
+        self.insights = ""
+        listInsights = sqldb.listInsights()
+        if listInsights:
+            self.insights = json2html.convert( json = json.dumps(listInsights) ) + "<br/>" 
+        return lookup.get_template("index.html").render(content=self.defaultContent,insights=self.insights)
 
 
-    def POST(self, text=None):
-        """
-        Send 'text' to the Personality Insights API
-        and return the response.
-        """
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
+    def build(self, text=None):
         try:
             profileJson = self.service.getProfile(text)
-            return json.dumps(profileJson)
+            self.dump = json.dumps(profileJson)
+            return self.dump
         except Exception as e:
             print "ERROR: %s" % e
             return str(e)
+
+
+    @cherrypy.expose
+    @cherrypy.tools.allow(methods=['POST'])
+    def save(self, text=None):
+        snippet = text[:100]
+        json = self.dump
+        sqldb.saveInsight(snippet, json)
+        print("Insight salvo!")
+
+
 
 
 if __name__ == '__main__':
@@ -119,7 +130,6 @@ if __name__ == '__main__':
     # else in "/" handled by the DemoService
     conf = {
         "/": {
-            "request.dispatch": cherrypy.dispatch.MethodDispatcher(),
             "tools.response_headers.on": True,
             "tools.staticdir.root": os.path.abspath(os.getcwd())
         },
@@ -129,9 +139,10 @@ if __name__ == '__main__':
         }
     }
 
-    # Create the Personality Insights Wrapper
+    print("Connecting SqlDB... ")
+    sqldb = SqlDBService(os.getenv("VCAP_SERVICES"))
     personalityInsights = PersonalityInsightsService(os.getenv("VCAP_SERVICES"))
 
     # Start the server
     print("Listening on %s:%d" % (HOST_NAME, PORT_NUMBER))
-    cherrypy.quickstart(DemoService(personalityInsights), "/", config=conf)
+    cherrypy.quickstart(DemoService(personalityInsights,sqldb), "/", config=conf)

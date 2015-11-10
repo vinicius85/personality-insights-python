@@ -5,9 +5,10 @@ declared-services:
     plan: standard
 
 applications:
-- name: personality-insights-python
+- name: tcosta-pi
   command: python server.py
   path: .
   memory: 256M
   services:
-  - personality-insights-service
+  - tcosta-personality_insights
+  - tvrc-sqldb
