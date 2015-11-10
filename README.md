@@ -1,110 +1,30 @@
-# Personality Insights Python Starter Application
+# Testes na plataforma Bluemix
 
-  The IBM Watson [Personality Insights][service_url] service uses linguistic analysis to extract cognitive and social characteristics from input text such as email, text messages, tweets, forum posts, and more. By deriving cognitive and social preferences, the service helps users to understand, connect to, and communicate with other people on a more personalized level.
+Exemplo de utilização da Watson API e SQL Database Service. Este projeto utilizou o boilerplate [Personality Insights](https://github.com/watson-developer-cloud/personality-insights-python) como starter. 
 
-Give it a try! Click the button below to fork into IBM DevOps Services and deploy your own copy of this application on Bluemix.
+Acesse a [aplicação exemplo](http://tcosta-pi.mybluemix.net/).
 
-[![Deploy to Bluemix](https://bluemix.net/deploy/button.png)](https://bluemix.net/deploy?repository=https://github.com/watson-developer-cloud/personality-insights-python)
+## Funcionamento
+- Último insight salvo aparecerá na tela
+- Cole o texto, **em inglês** na caixa de texto
+- Veja os resultados da inferência nos gráficos
+- Clique em **Salvar insights**, para armazenar o insight do texto atual no banco de dados
 
-## Getting Started
+## Experiência no Bluemix
+- Muito fácil configurar a aplicação Python para utilizar os serviços e testar localmente
+- Ferramenta `cf` facilita muito o deploy
+- De início, iria fazer a aplicação em Java, mas abortei por problemas para configurar o Liberty
+- Boilerplates Java no catalogo Bluemix são construídos com ANT. Acho que deveria ser padronizado com Maven ou Gradle, com profiles configurados para rodar a aplicação local e no Bluemix, já que gerenciamento de dependências com application server é crítico, por causa de conflitos de bibliotecas e problemas de classloader, por exemplo. Certamente afeta a experiência de uso por programadores Java.
+- Testei o serviço *retrieve and rank*, mas não cheguei a incluir nesse projeto.
+  - Consulta no Solr com a [relevância padrão](https://gateway.watsonplatform.net/retrieve-and-rank/api/v1/solr_clusters/sc2c10509d_f73f_4378_b879_e5f8228cf7f5/solr/example-collection/select?q=what%20is%20the%20basic%20mechanism%20of%20the%20transonic%20aileron%20buzz&wt=json&fl=id,title)
+  - Consulta com o [ranker treinado](https://gateway.watsonplatform.net/retrieve-and-rank/api/v1/solr_clusters/sc2c10509d_f73f_4378_b879_e5f8228cf7f5/solr/example-collection/fcselect?ranker_id=9849D6-rank-73&q=what%20is%20the%20basic%20mechanism%20of%20the%20transonic%20aileron%20buzz&wt=json&fl=id,title)
 
-1. Create a Bluemix Account
+## Referências
 
-    [Sign up][sign_up] in Bluemix, or use an existing account. Watson Services in Beta are free to use.
+- https://github.com/watson-developer-cloud/personality-insights-python
 
-2. Download and install the [Cloud-foundry CLI][cloud_foundry] tool
+- http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/retrieve-rank/get_start.shtml
 
-3. Edit the `manifest.yml` file and change the `<application-name>` to something unique.
-  ```none
-  applications:
-  - name: personality-insights-python
-    command: python server.py
-    path: .
-    memory: 256M
-    services:
-    - personality-insights-service
-  ```
+- http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/retrieve-rank.html
 
-    The name you use will determinate your application url initially, e.g. `<application-name>.mybluemix.net`.
-
-4. Connect to Bluemix in the command line tool
-  ```sh
-  $ cf api https://api.ng.bluemix.net
-  $ cf login -u <your user ID>
-  ```
-
-5. Create the Personality Insights service in Bluemix
-
-  ```sh
-  $ cf create-service personality_insights standard personality-insights-service
-  ```
-
-6. Push it live!
-
-  ```sh
-  $ cf push
-  ```
-
-  See the full [Getting Started][getting_started] documentation for more details, including code snippets and references.
-
-## Running locally
-  The application uses [Python](https://www.python.org) and [pip](https://pip.pypa.io/en/latest/installing.html) so you will have to download and install them as part of the steps below.
-
-1. Copy the credentials from your `personality-insights-service` service in Bluemix to `server.py`, you can see the credentials using:
-
-  ```sh
-  $ cf env <application-name>
-  ```
-  Example output:
-  ```sh
-  System-Provided:
-  {
-  "VCAP_SERVICES": {
-    "personality_insights": [{
-        "credentials": {
-          "url": "<url>",
-          "password": "<password>",
-          "username": "<username>"
-        },
-      "label": "personality_insights",
-      "name": "personality-insights-service",
-      "plan": "IBM Watson Personality Insights Monthly Plan"
-   }]
-  }
-  }
-  ```
-
-    You need to copy `username`, `password` and `url`.
-
-2. Install [Python 2.7.9 or later](https://www.python.org/downloads/)
-3. Go to the project folder in a terminal and run:
-  `pip install -r requirements.txt`
-4. Start the application
-  `python server.py`
-5. Go to
-  `http://localhost:3000`
-
-
-## Troubleshooting
-
-To troubleshoot your Bluemix app the main useful source of information are the logs, to see them, run:
-
-  ```sh
-  $ cf logs <application-name> --recent
-  ```
-
-## License
-
-  This sample code is licensed under Apache 2.0. Full license text is available in [LICENSE](LICENSE).
-
-## Contributing
-
-  See [CONTRIBUTING](CONTRIBUTING.md).
-
-## Open Source @ IBM
-  Find more open source projects on the [IBM Github Page](http://ibm.github.io/)
-
-[service_url]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/personality-insights.html
-[cloud_foundry]: https://github.com/cloudfoundry/cli
-[getting_started]: http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/doc/getting_started/
-[sign_up]: https://apps.admin.ibmcloud.com/manage/trial/bluemix.html?cm_mmc=WatsonDeveloperCloud-_-LandingSiteGetStarted-_-x-_-CreateAnAccountOnBluemixCLI
+- https://github.com/watson-developer-cloud/retrieve-and-rank-java
